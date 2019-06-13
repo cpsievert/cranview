@@ -1,0 +1,17 @@
+---
+title: "CRAN downloads from {{from}} to `r Sys.Date() - 1`"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+
+```{r, out.width='100%'}
+{{code}}
+```

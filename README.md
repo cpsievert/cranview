@@ -1,6 +1,4 @@
-View CRAN Package Downloads with Shiny
+CRAN Package Downloads explorer
 ------------------
 
-A Shiny app to visualize downloads from RStudio's CRAN mirror.
-
-View the app [here](https://dgrtwo.shinyapps.io/cranview/), or read more about it [here](http://varianceexplained.org/r/cran-view).
+This app is a modified version of David Robinson's [cranview app](http://varianceexplained.org/r/cran-view) that adds the ability to download a report with source code for re-generating the chart. As a result, this downloaded report can be re-compiled in the future to get at new data for the chosen packages.
