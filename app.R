@@ -56,7 +56,7 @@ server <- function(input, output, session) {
     })
   })
   
-  getDownloads <- metaReactive2({
+  downloads <- metaReactive2({
     req(from())
     
     metaExpr({
@@ -68,32 +68,33 @@ server <- function(input, output, session) {
     })
   })
   
-  getTransformedDownloads <- metaReactive2({
+  downloadsTransformed <- metaReactive2({
 
     if (input$transformation == "weekly") {
       metaExpr({
-        !!getDownloads() %>%
+        !!downloads() %>%
           mutate(count = zoo::rollapply(count, 7, sum, fill=NA))
       })
     } else if (input$transformation == "cumulative") {
       metaExpr({
-        !!getDownloads() %>%
+        !!downloads() %>%
           group_by(package) %>%
           transmute(count = cumsum(count), date = date) 
       })
     } else {
       metaExpr({
-        !!getDownloads()
+        !!downloads()
       })
     }
   })
   
   output$downloadsPlot <- metaRender(renderPlotly, {
     plot_ly(
-      !!getTransformedDownloads(), 
+      !!downloadsTransformed(), 
       x = ~date, y = ~count, color = ~package
     ) %>%
       add_lines() %>%
+      config(displayModeBar = FALSE) %>%
       layout(
         hovermode = "x",
         yaxis = list(title = "Number of downloads"),
@@ -103,23 +104,22 @@ server <- function(input, output, session) {
           rangeselector = list(
             buttons = list(
               list(
-                count=1,
-                label='1m',
-                step='month',
-                stepmode='backward'
+                count = 1,
+                label = '1m',
+                step = 'month',
+                stepmode = 'backward'
               ),
               list(
-                count=12,
-                label='1yr',
-                step='month',
-                stepmode='backward'
+                count = 12,
+                label = '1yr',
+                step = 'month',
+                stepmode = 'backward'
               ), 
               list(step = "all")
             )
           )
         )
-      ) %>%
-      config(displayModeBar = FALSE)
+      )
   })
   
   
@@ -133,23 +133,19 @@ server <- function(input, output, session) {
           library(cranlogs)
           library(plotly)
           source("initial-release.R")
-          downloads <- !!getDownloads()
-          downloads2 <- !!getTransformedDownloads()
+          downloads <- !!downloads()
+          downloadsTransformed <- !!downloadsTransformed()
           !!output$downloadsPlot()
         },
         patchCalls = list(
-          getDownloads = quote(downloads),
-          getTransformedDownloads =  quote(downloads2)
+          downloads = quote(downloads),
+          downloadsTransformed =  quote(downloadsTransformed)
         )
       )
       
       buildRmdBundle(
-        "cran-report.Rmd",
-        out,
-        vars = list(
-          from = from(),
-          code = code
-        ),
+        "cran-report.Rmd", out,
+        vars = list(from = from(), code = code),
         include_files = "initial-release.R"
       )
     }
