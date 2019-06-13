@@ -24,7 +24,7 @@ ui <- fluidPage(
         label = "Packages:",
         # initialize the graph with a random package
         selected = sample(cran_pkgs, 2), 
-        choices = cran_pkgs,
+        choices = sample(cran_pkgs, 2),
         multiple = TRUE
       ),      
       radioButtons(
@@ -38,19 +38,34 @@ ui <- fluidPage(
   )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
+  
+  updateSelectizeInput(
+    session, "packages", 
+    selected = sample(cran_pkgs, 2),
+    choices = cran_pkgs, 
+    server = TRUE
+  )
   
   # TODO: calculate initial date more efficiently (i.e., remember packages' initial dates)
-  from <- metaReactive({
-    initial_release(!!input$packages)
+  from <- metaReactive2({
+    req(input$packages)
+    
+    metaExpr({
+      initial_release(!!input$packages)
+    })
   })
   
-  getDownloads <- metaReactive({
-    cran_downloads(
-      package = !!input$packages, 
-      from    = !!from(),
-      to      = Sys.Date() - 1
-    )
+  getDownloads <- metaReactive2({
+    req(from())
+    
+    metaExpr({
+      cran_downloads(
+        package = !!input$packages, 
+        from    = !!from(),
+        to      = Sys.Date() - 1
+      )
+    })
   })
   
   getTransformedDownloads <- metaReactive2({
