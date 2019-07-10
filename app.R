@@ -69,7 +69,7 @@ server <- function(input, output, session) {
   })
   
   downloadsTransformed <- metaReactive2({
-
+    
     if (input$transformation == "weekly") {
       metaExpr({
         !!downloads() %>%
@@ -127,20 +127,14 @@ server <- function(input, output, session) {
     "cran-report.zip", 
     content = function(out) {
       
-      code <- expandCode(
-        {
+      code <- expandChain(
+        quote({
           library(dplyr)
           library(cranlogs)
           library(plotly)
           source("initial-release.R")
-          downloads <- !!downloads()
-          downloadsTransformed <- !!downloadsTransformed()
-          !!output$downloadsPlot()
-        },
-        patchCalls = list(
-          downloads = quote(downloads),
-          downloadsTransformed =  quote(downloadsTransformed)
-        )
+        }),
+        output$downloadsPlot()
       )
       
       buildRmdBundle(
