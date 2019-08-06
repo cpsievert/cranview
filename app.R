@@ -52,7 +52,7 @@ server <- function(input, output, session) {
     req(input$packages)
     
     metaExpr({
-      initial_release(!!input$packages)
+      initial_release(..(input$packages))
     })
   })
   
@@ -61,8 +61,8 @@ server <- function(input, output, session) {
     
     metaExpr({
       cran_downloads(
-        package = !!input$packages, 
-        from    = !!from(),
+        package = ..(input$packages), 
+        from    = ..(from()),
         to      = Sys.Date() - 1
       )
     })
@@ -72,25 +72,25 @@ server <- function(input, output, session) {
     
     if (input$transformation == "weekly") {
       metaExpr({
-        !!downloads() %>%
+        ..(downloads()) %>%
           mutate(count = zoo::rollapply(count, 7, sum, fill=NA))
       })
     } else if (input$transformation == "cumulative") {
       metaExpr({
-        !!downloads() %>%
+        ..(downloads()) %>%
           group_by(package) %>%
           transmute(count = cumsum(count), date = date) 
       })
     } else {
       metaExpr({
-        !!downloads()
+        ..(downloads())
       })
     }
   })
   
   output$downloadsPlot <- metaRender(renderPlotly, {
     plot_ly(
-      !!downloadsTransformed(), 
+      ..(downloadsTransformed()), 
       x = ~date, y = ~count, color = ~package
     ) %>%
       add_lines() %>%
