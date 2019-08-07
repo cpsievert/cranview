@@ -4,6 +4,7 @@ library(dplyr)
 library(cranlogs)
 library(plotly)
 
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
 source("initial-release.R")
 
 # get the list of all packages on CRAN
